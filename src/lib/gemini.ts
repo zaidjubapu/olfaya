@@ -4,6 +4,11 @@ import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 // release; pin a specific model with GEMINI_MODEL if you need stable behaviour.
 export const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-flash-latest";
 
+// Flash often answers 503 "high demand"; when it does, the same request goes to this lighter model
+// before the offline matcher takes over. Set GEMINI_FALLBACK_MODEL to "none" to turn it off.
+const FALLBACK = process.env.GEMINI_FALLBACK_MODEL ?? "gemini-flash-lite-latest";
+export const GEMINI_MODELS = FALLBACK === "none" || FALLBACK === GEMINI_MODEL ? [GEMINI_MODEL] : [GEMINI_MODEL, FALLBACK];
+
 export function geminiKey() {
   return process.env.GEMINI_API_KEY ?? process.env.GOOGLE_API_KEY ?? process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 }
