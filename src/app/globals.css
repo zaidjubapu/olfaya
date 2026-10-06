@@ -36,6 +36,7 @@
 }
 
 html {
+  overflow-x: clip;
   background: var(--color-ink);
   color: var(--color-ivory);
   scroll-behavior: smooth;
@@ -45,7 +46,7 @@ body {
   background: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Film grain over everything for a printed, tactile feel. */

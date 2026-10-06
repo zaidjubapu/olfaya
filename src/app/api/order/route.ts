@@ -28,6 +28,7 @@ export async function POST(req: Request) {
   } catch {
     return Response.json({ error: "Invalid JSON" }, { status: 400 });
   }
+  if (!body || typeof body !== "object") return Response.json({ error: "Invalid order" }, { status: 400 });
   const { currency, items, customer, payment } = body;
   if (!["INR", "AED", "SAR"].includes(currency)) return Response.json({ error: "Unsupported currency" }, { status: 400 });
   if (!Array.isArray(items) || !items.length || items.length > 30) return Response.json({ error: "Empty bag" }, { status: 400 });
@@ -37,9 +38,11 @@ export async function POST(req: Request) {
 
   let subtotal = 0;
   for (const line of items) {
+    if (!line || typeof line.id !== "string") return Response.json({ error: "Invalid item" }, { status: 400 });
     const p = unitPrice(line, currency);
-    const qty = Math.floor(Number(line.qty));
-    if (p === null || !(qty >= 1 && qty <= 10)) return Response.json({ error: `Unknown item ${line.id}` }, { status: 400 });
+    if (p === null) return Response.json({ error: `Unknown item ${line.id}` }, { status: 400 });
+    const qty = Number(line.qty);
+    if (!Number.isInteger(qty) || qty < 1 || qty > 10) return Response.json({ error: "Quantity must be between 1 and 10" }, { status: 400 });
     subtotal += p * qty;
   }
   const shipping = subtotal >= FREE_SHIPPING[currency] ? 0 : SHIPPING[currency];

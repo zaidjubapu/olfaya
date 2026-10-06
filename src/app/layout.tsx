@@ -5,9 +5,10 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
 import { ConciergeBubble } from "@/components/ConciergeBubble";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://olfaya.com"),
+  metadataBase: new URL(SITE_URL),
   title: { default: "OLFAYA | Perfume for the AI Era", template: "%s | OLFAYA" },
   description:
     "OLFAYA is a luxury perfume house for India and the Gulf. Heritage attar, oud and saffron, composed with AI and finished by hand. Find your Scent DNA.",
