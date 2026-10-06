@@ -1,10 +1,15 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { catalogForPrompt, BESPOKE, DISCOVERY_SET } from "./catalog";
+import { geminiKey } from "./gemini";
 
 export const MODEL = process.env.OLFAYA_MODEL ?? "claude-opus-5-5";
 
-export function hasAI() {
-  return Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
+// Gemini is used when its key is set; Claude when only an Anthropic key is set;
+// otherwise the offline recommender answers.
+export function aiProvider(): "gemini" | "claude" | null {
+  if (geminiKey()) return "gemini";
+  if (process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN) return "claude";
+  return null;
 }
 
 let client: Anthropic | null = null;
@@ -84,5 +89,5 @@ export type ScentDNA = {
   bespokeName: string;
   bespokeArabic: string;
   matches: { slug: string; reason: string }[];
-  source?: "ai" | "offline";
+  source?: "gemini" | "claude" | "offline";
 };

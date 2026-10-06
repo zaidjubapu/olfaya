@@ -19,6 +19,9 @@ Aya also floats on every page as a chat bubble.
 
 ## AI backend
 
+The AI runs on **Google Gemini Flash** when `GEMINI_API_KEY` (or `GOOGLE_API_KEY`) is set, on Claude when only `ANTHROPIC_API_KEY` is set, and on the offline matcher when neither is.
+
+
 - `POST /api/concierge` streams Claude (`claude-opus-5-5`, low effort for snappy chat) with the full catalog in a cached system prompt. The model tags products as `[[slug]]`, which the UI turns into shoppable cards.
 - `POST /api/scent-dna` uses structured outputs (JSON schema) to return a scent portrait, accord strengths, a top/heart/base formula, a bespoke name in English and Arabic, and matches.
 - Both use server-side refusal fallbacks and **degrade gracefully**: with no `ANTHROPIC_API_KEY`, or if the API errors, a deterministic recommender (`src/lib/recommender.ts`) answers instead, so the store never breaks.
@@ -35,7 +38,7 @@ npm run dev
 ## Deploy (always on, nothing on your computer)
 
 1. Go to https://vercel.com/new and import this GitHub repo (framework: Next.js, no settings to change).
-2. Add `ANTHROPIC_API_KEY` (from https://console.anthropic.com) under Environment Variables.
+2. Add `GEMINI_API_KEY` (from https://aistudio.google.com/apikey) under Environment Variables.
 3. Deploy. Point `olfaya.com` at it under Settings → Domains once the domain is registered.
 
 ## Brand system
