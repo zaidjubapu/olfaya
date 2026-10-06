@@ -2,12 +2,25 @@ import Anthropic from "@anthropic-ai/sdk";
 import { aiProvider, anthropic, DNA_SCHEMA, DNA_SYSTEM, MODEL, type ScentDNA } from "@/lib/ai";
 import { getFragrance } from "@/lib/catalog";
 import { offlineDNA } from "@/lib/dna";
-import { FAST_THINKING, gemini, GEMINI_MODEL } from "@/lib/gemini";
+import { FAST_THINKING, gemini, GEMINI_MODELS } from "@/lib/gemini";
 import type { QuizAnswers } from "@/lib/recommender";
 
 async function geminiDNA(prompt: string): Promise<string | undefined> {
+  let lastErr: unknown;
+  for (const model of GEMINI_MODELS) {
+    try {
+      return await geminiDNAWith(model, prompt);
+    } catch (err) {
+      console.error(`scent-dna gemini ${model} error`, String(err).slice(0, 300));
+      lastErr = err;
+    }
+  }
+  throw lastErr;
+}
+
+async function geminiDNAWith(model: string, prompt: string): Promise<string | undefined> {
   const res = await gemini().models.generateContent({
-    model: GEMINI_MODEL,
+    model,
     contents: prompt,
     config: {
       systemInstruction: DNA_SYSTEM,

@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { aiProvider, anthropic, CONCIERGE_SYSTEM, MODEL } from "@/lib/ai";
-import { FAST_THINKING, gemini, GEMINI_MODEL, toGeminiContents } from "@/lib/gemini";
+import { FAST_THINKING, gemini, GEMINI_MODELS, toGeminiContents } from "@/lib/gemini";
 import { offlineConcierge } from "@/lib/recommender";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
@@ -14,12 +14,27 @@ function textStream(text: string) {
 }
 
 async function* geminiReply(messages: ChatMessage[], signal: AbortSignal) {
-  const stream = await gemini().models.generateContentStream({
-    model: GEMINI_MODEL,
-    contents: toGeminiContents(messages),
-    config: { systemInstruction: CONCIERGE_SYSTEM, maxOutputTokens: 2048, thinkingConfig: FAST_THINKING, abortSignal: signal },
-  });
-  for await (const chunk of stream) if (chunk.text) yield chunk.text;
+  for (const [i, model] of GEMINI_MODELS.entries()) {
+    let sent = false;
+    try {
+      const stream = await gemini().models.generateContentStream({
+        model,
+        contents: toGeminiContents(messages),
+        config: { systemInstruction: CONCIERGE_SYSTEM, maxOutputTokens: 2048, thinkingConfig: FAST_THINKING, abortSignal: signal },
+      });
+      for await (const chunk of stream) {
+        if (chunk.text) {
+          sent = true;
+          yield chunk.text;
+        }
+      }
+      return;
+    } catch (err) {
+      // Only switch models before any text went out, or the reply would repeat itself.
+      if (sent || signal.aborted || i === GEMINI_MODELS.length - 1) throw err;
+      console.error(`concierge gemini ${model} error, trying next model`, String(err).slice(0, 300));
+    }
+  }
 }
 
 async function* claudeReply(messages: ChatMessage[], signal: AbortSignal) {
