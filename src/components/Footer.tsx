@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SubscribeForm } from "./SubscribeForm";
 
 export function Footer() {
   return (
@@ -10,16 +11,7 @@ export function Footer() {
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-mist">
             Perfume for the AI era. Heritage materials from Kannauj to Dhofar, composed with intelligence and finished by hand.
           </p>
-          <form className="mt-8 flex max-w-sm gap-2" action="/api/subscribe" method="post">
-            <input
-              type="email"
-              name="email"
-              required
-              placeholder="Email for early access"
-              className="w-full rounded-full border hairline bg-transparent px-4 py-3 text-sm outline-none placeholder:text-mist/60 focus:border-gold"
-            />
-            <button className="btn-gold shrink-0 rounded-full px-5 text-sm font-medium">Join</button>
-          </form>
+          <SubscribeForm />
         </div>
         <div className="text-sm">
           <p className="mb-4 text-xs uppercase tracking-[0.25em] text-gold">Explore</p>

@@ -6,6 +6,24 @@ import { useStore } from "@/lib/store";
 
 type Result = { orderId: string; total: number; razorpay: { keyId: string; orderId: string; amount: number; currency: string } | null };
 
+type RazorpayCheckout = { open: () => void };
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => RazorpayCheckout;
+  }
+}
+
+function loadRazorpay(): Promise<boolean> {
+  if (window.Razorpay) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.body.appendChild(s);
+  });
+}
+
 const COUNTRIES = ["India", "United Arab Emirates", "Saudi Arabia", "Qatar", "Kuwait", "Bahrain", "Oman"];
 
 export default function CheckoutPage() {
@@ -34,6 +52,18 @@ export default function CheckoutPage() {
       if (!res.ok) throw new Error(data.error ?? "Something went wrong");
       setDone(data);
       for (const i of cart) setQty(i.id, i.variant, 0);
+      if (data.razorpay && (await loadRazorpay()) && window.Razorpay) {
+        new window.Razorpay({
+          key: data.razorpay.keyId,
+          order_id: data.razorpay.orderId,
+          amount: data.razorpay.amount,
+          currency: data.razorpay.currency,
+          name: "OLFAYA",
+          description: `Order ${data.orderId}`,
+          prefill: { name: customer.name, email: customer.email, contact: customer.phone },
+          theme: { color: "#E8B86B" },
+        }).open();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -84,7 +114,7 @@ export default function CheckoutPage() {
           <p className="mb-3 text-xs uppercase tracking-[0.25em] text-mist">Payment</p>
           <div className="grid gap-3 sm:grid-cols-2">
             {[
-              ["online", "Pay online", currency === "INR" ? "UPI, cards, netbanking" : "Cards, Apple Pay"],
+              ["online", "Pay online", currency === "INR" ? "UPI, cards, netbanking" : "Debit and credit cards"],
               ["cod", "Cash on delivery", "Confirmed on WhatsApp"],
             ].map(([v, l, h]) => (
               <button

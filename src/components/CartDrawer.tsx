@@ -79,7 +79,7 @@ export function CartDrawer() {
             >
               Checkout
             </Link>
-            <p className="mt-3 text-center text-[11px] text-mist/70">UPI, cards, Apple Pay, Tabby and cash on delivery</p>
+            <p className="mt-3 text-center text-[11px] text-mist/70">UPI, cards and cash on delivery</p>
           </div>
         )}
       </aside>

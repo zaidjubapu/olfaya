@@ -42,6 +42,9 @@ export async function POST(req: Request) {
   } catch {
     return Response.json({ error: "Invalid JSON" }, { status: 400 });
   }
+  if (!answers || typeof answers !== "object" || Array.isArray(answers)) {
+    return Response.json({ error: "Send your quiz answers as an object" }, { status: 400 });
+  }
   if (answers.memory) answers.memory = String(answers.memory).slice(0, 600);
 
   const provider = aiProvider();

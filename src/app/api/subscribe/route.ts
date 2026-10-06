@@ -1,6 +1,11 @@
 export async function POST(req: Request) {
   const type = req.headers.get("content-type") ?? "";
-  const email = type.includes("application/json") ? (await req.json()).email : (await req.formData()).get("email");
+  let email: unknown;
+  try {
+    email = type.includes("application/json") ? (await req.json())?.email : (await req.formData()).get("email");
+  } catch {
+    return Response.json({ error: "Please enter a valid email" }, { status: 400 });
+  }
   if (typeof email !== "string" || !/^\S+@\S+\.\S+$/.test(email)) {
     return Response.json({ error: "Please enter a valid email" }, { status: 400 });
   }
